@@ -36,7 +36,7 @@ const WHY = [
   { icon: "🍃", title: "Real Brewed Tea",  desc: "Whole-leaf tea, brewed slow and cold for a genuinely clean flavour profile." },
   { icon: "⚡", title: "Zero Sugar",        desc: "Naturally sweetened. No spikes, no crash. Just clean hydration all day." },
   { icon: "🧪", title: "No Preservatives", desc: "If you can't pronounce it, we don't add it. Minimal ingredients, maximum refreshment." },
-  { icon: "🎯", title: "Gen-Z Energy",      desc: "Built for creators, athletes and people who move fast. No compromise." },
+  // { icon: "🎯", title: "Gen-Z Energy",      desc: "Built for creators, athletes and people who move fast. No compromise." },
 ];
 
 const COMPARE = [
