@@ -157,7 +157,7 @@ export default function App() {
   const CARD = d ? "#1c1c1c" : "#ffffff";
   const TX   = d ? "#f0f0f0" : "#111111";
   const MT   = d ? "#888888" : "#666666";
-  const BR   = d ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)";
+  const BR   = d ? "rgba(255, 255, 255, 0.07)" : "rgba(255, 255, 255, 0.07)";
   const YLW  = "#FFE45E";
   const navBG = scrollY > 40
     ? (d ? "rgba(14,14,14,0.92)" : "rgba(250,250,247,0.92)")
