@@ -481,6 +481,7 @@ export default function App() {
       >
         CLEANER. LIGHTER.
         <br />
+        <br />
         <span style={{ color: YLW }}>BETTER.</span>
       </h3>
     </div>
