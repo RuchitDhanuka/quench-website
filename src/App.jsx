@@ -8,9 +8,9 @@ import { useState, useEffect, useRef } from "react";
         {{to_name}}   {{to_email}}   {{reply_to}}
    4. Paste your IDs below
 ────────────────────────────────────────────────────────────────────────────── */
-const EJS_SERVICE  = "YOUR_SERVICE_ID";
-const EJS_TEMPLATE = "YOUR_TEMPLATE_ID";
-const EJS_KEY      = "YOUR_PUBLIC_KEY";
+const EJS_SERVICE  = "service_12blv4h";
+const EJS_TEMPLATE = "template_zqfza0j";
+const EJS_KEY      = "2qiVqozantoDGpwH2";
 
 /* ── Data ── */
 const FLAVOURS = [
