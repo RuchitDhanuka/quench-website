@@ -763,6 +763,7 @@ export default function App() {
       {/* ── FOOTER ── */}
       <footer style={{padding:"52px 6%",background:"#070707",textAlign:"center"}}>
         <div className="bb" style={{fontSize:"3.6rem",letterSpacing:"8px",color:"white",marginBottom:7}}>QUENCH</div>
+        <br />
         <div style={{color:"#2a2a2a",fontSize:"0.8rem",marginBottom:26}}>Tea That Hits Different. · Real. Clean. Unreal.</div>
         <div style={{display:"flex",gap:26,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
           {["Instagram","Twitter / X","hello@drinkquench.in","Privacy Policy"].map(l=>(
