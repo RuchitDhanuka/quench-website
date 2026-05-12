@@ -138,7 +138,7 @@ export default function App() {
       await window.emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
         to_name: name || "Friend",
         to_email: email,
-        reply_to: "hello@drinkquench.in",
+        reply_to: email,
       });
     } catch (err) {
       /* EmailJS not configured yet – fail silently, still save */
@@ -365,106 +365,510 @@ export default function App() {
       </section>
 
       {/* ── WHY + COMPARE ── */}
-      <section id="why" style={{padding:"110px 6%",background:BG2}}>
-        <div style={{marginBottom:54}}>
-          <div className="sl" style={{marginBottom:14}}>WHY QUENCH</div>
-          <h2 className="bb" style={{fontSize:"clamp(3rem,7vw,6rem)",lineHeight:0.9,color:TX}}>
-            BUILT<br/><span style={{color:YLW,WebkitTextStroke:`1.5px ${TX}`}}>DIFFERENT.</span>
-          </h2>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",gap:16,marginBottom:56}}>
-          {WHY.map((w,i)=>(
-            <div key={i} className="wcard" style={{background:CARD,borderRadius:22,padding:28,border:`1.5px solid ${BR}`}}>
-              <div style={{fontSize:"2.1rem",marginBottom:12}}>{w.icon}</div>
-              <h3 className="bb" style={{fontSize:"1.65rem",marginBottom:8,letterSpacing:"1px",color:TX}}>{w.title}</h3>
-              <p style={{color:MT,lineHeight:1.75,fontSize:"0.85rem"}}>{w.desc}</p>
-            </div>
-          ))}
+<section
+  id="why"
+  style={{
+    padding: "110px 6%",
+    background: BG2,
+  }}
+>
+  {/* HEADING */}
+  <div style={{ marginBottom: 54 }}>
+    <div className="sl" style={{ marginBottom: 14 }}>
+      WHY QUENCH
+    </div>
+
+    <h2
+      className="bb"
+      style={{
+        fontSize: "clamp(3rem,7vw,6rem)",
+        lineHeight: 0.9,
+        color: TX,
+      }}
+    >
+      BUILT
+      <br />
+      <span
+        style={{
+          color: YLW,
+          WebkitTextStroke: `1.5px ${TX}`,
+        }}
+      >
+        DIFFERENT.
+      </span>
+    </h2>
+  </div>
+
+  {/* WHY CARDS */}
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+      gap: 18,
+      marginBottom: 60,
+    }}
+  >
+    {WHY.map((w, i) => (
+      <div
+        key={i}
+        className="wcard"
+        style={{
+          background: CARD,
+          borderRadius: 24,
+          padding: 28,
+          border: `1.5px solid ${BR}`,
+          transition: "0.3s",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "2.2rem",
+            marginBottom: 14,
+          }}
+        >
+          {w.icon}
         </div>
 
-        {/* ── COMPARISON TABLE (improved) ── */}
-        <div style={{background:CARD,borderRadius:28,border:`1.5px solid ${BR}`,overflow:"hidden"}}>
+        <h3
+          className="bb"
+          style={{
+            fontSize: "1.7rem",
+            marginBottom: 10,
+            letterSpacing: "1px",
+            color: TX,
+          }}
+        >
+          {w.title}
+        </h3>
 
-          {/* column headers */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",borderBottom:`2px solid ${BR}`}}>
-            <div style={{padding:"24px 28px"}}>
-              <div style={{fontSize:"0.63rem",fontWeight:700,letterSpacing:"2px",color:"#888"}}>WHAT MATTERS</div>
-            </div>
-            <div style={{padding:"24px 28px",background:d?"rgba(255,228,94,0.1)":"rgba(255,228,94,0.16)",borderLeft:`1px solid ${BR}`}}>
-              <div className="bb" style={{fontSize:"1.65rem",letterSpacing:"3px",color:TX}}>QUENCH</div>
-              <div style={{fontSize:"0.62rem",fontWeight:700,color:"#888",marginTop:2,letterSpacing:"1px"}}>CLEAN LABEL ✦</div>
-            </div>
-            <div style={{padding:"24px 28px",borderLeft:`1px solid ${BR}`}}>
-              <div className="bb" style={{fontSize:"1.65rem",letterSpacing:"2px",color:d?"#444":"#bbb"}}>TYPICAL BRAND</div>
-              <div style={{fontSize:"0.62rem",fontWeight:700,color:"#888",marginTop:2,letterSpacing:"1px"}}>MASS MARKET</div>
+        <p
+          style={{
+            color: MT,
+            lineHeight: 1.75,
+            fontSize: "0.88rem",
+          }}
+        >
+          {w.desc}
+        </p>
+      </div>
+    ))}
+  </div>
+
+  {/* ───────────── COMPARISON SECTION ───────────── */}
+  <div
+    style={{
+      background: CARD,
+      borderRadius: 30,
+      border: `1.5px solid ${BR}`,
+      overflow: "hidden",
+      boxShadow: d
+        ? "none"
+        : "0 10px 35px rgba(0,0,0,0.05)",
+    }}
+  >
+    {/* TOP HEADER */}
+    <div
+      style={{
+        padding: "32px 24px",
+        borderBottom: `1px solid ${BR}`,
+        background: d
+          ? "rgba(255,255,255,0.015)"
+          : "rgba(255,228,94,0.08)",
+      }}
+    >
+      <div
+        className="bb"
+        style={{
+          fontSize: "clamp(2.2rem,5vw,3.5rem)",
+          letterSpacing: "2px",
+          marginBottom: 10,
+          color: TX,
+        }}
+      >
+        QUENCH VS THE REST
+      </div>
+
+      <p
+        style={{
+          color: MT,
+          lineHeight: 1.8,
+          fontSize: "0.92rem",
+          maxWidth: 650,
+        }}
+      >
+        Most iced tea brands are loaded with sugar,
+        preservatives and artificial ingredients.
+        QUENCH keeps it clean, refreshing and honest.
+      </p>
+    </div>
+
+    {/* DESKTOP TABLE */}
+    <div className="compare-desktop">
+      {/* TABLE HEAD */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.5fr 1fr 1fr",
+          padding: "18px 24px",
+          borderBottom: `1px solid ${BR}`,
+          background: d
+            ? "rgba(255,255,255,0.02)"
+            : "rgba(0,0,0,0.02)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "0.78rem",
+            fontWeight: 700,
+            letterSpacing: "1.5px",
+            color: "#888",
+            textTransform: "uppercase",
+          }}
+        >
+          Feature
+        </div>
+
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <div
+            className="bb"
+            style={{
+              fontSize: "1.5rem",
+              color: "#16a34a",
+              letterSpacing: "2px",
+            }}
+          >
+            QUENCH
+          </div>
+        </div>
+
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <div
+            className="bb"
+            style={{
+              fontSize: "1.5rem",
+              color: "#ef4444",
+              letterSpacing: "2px",
+            }}
+          >
+            OTHERS
+          </div>
+        </div>
+      </div>
+
+      {/* ROWS */}
+      {COMPARE.map((row, ri) => (
+        <div
+          key={ri}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.5fr 1fr 1fr",
+            alignItems: "center",
+            padding: "18px 24px",
+            borderBottom:
+              ri !== COMPARE.length - 1
+                ? `1px solid ${BR}`
+                : "none",
+            background:
+              ri % 2 === 0
+                ? "transparent"
+                : d
+                ? "rgba(255,255,255,0.01)"
+                : "rgba(0,0,0,0.015)",
+          }}
+        >
+          {/* FEATURE */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              color: TX,
+              fontWeight: 600,
+              fontSize: "0.9rem",
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: YLW,
+                flexShrink: 0,
+              }}
+            />
+
+            {row.feature}
+          </div>
+
+          {/* QUENCH */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                background: "rgba(34,197,94,0.12)",
+                color: "#16a34a",
+                borderRadius: 999,
+                padding: "8px 16px",
+                fontWeight: 700,
+                fontSize: "0.8rem",
+                minWidth: 90,
+                textAlign: "center",
+              }}
+            >
+              ✅ Yes
             </div>
           </div>
 
-          {/* score summary */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",borderBottom:`1.5px solid ${BR}`,
-            background:d?"rgba(255,255,255,0.015)":"rgba(0,0,0,0.012)"}}>
-            <div style={{padding:"14px 28px",display:"flex",alignItems:"center"}}>
-              <span style={{fontSize:"0.68rem",fontWeight:700,color:"#888",letterSpacing:"1px"}}>CLEAN SCORE</span>
-            </div>
-            <div style={{padding:"14px 28px",borderLeft:`1px solid ${BR}`,
-              background:d?"rgba(255,228,94,0.06)":"rgba(255,228,94,0.1)",
-              display:"flex",alignItems:"center",gap:10}}>
-              <span style={{background:"#22c55e",color:"white",borderRadius:999,padding:"4px 14px",fontSize:"0.8rem",fontWeight:800}}>8 / 8</span>
-              <span style={{fontSize:"0.75rem",color:"#22c55e",fontWeight:700}}>Perfect</span>
-            </div>
-            <div style={{padding:"14px 28px",borderLeft:`1px solid ${BR}`,display:"flex",alignItems:"center",gap:10}}>
-              <span style={{background:"#ef4444",color:"white",borderRadius:999,padding:"4px 14px",fontSize:"0.8rem",fontWeight:800}}>1 / 8</span>
-              <span style={{fontSize:"0.75rem",color:"#ef4444",fontWeight:700}}>Mostly fails</span>
-            </div>
-          </div>
-
-          {/* data rows */}
-          {COMPARE.map((row,ri)=>(
-            <div key={ri} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",
-              borderBottom: ri<COMPARE.length-1?`1px solid ${BR}`:"none",
-              background: ri%2===0?"transparent":(d?"rgba(255,255,255,0.013)":"rgba(0,0,0,0.01)")}}>
-              {/* feature name */}
-              <div style={{padding:"15px 28px",fontSize:"0.86rem",fontWeight:600,color:TX,display:"flex",alignItems:"center",gap:10}}>
-                <span style={{width:5,height:5,borderRadius:"50%",background:YLW,display:"inline-block",flexShrink:0}}/>
-                {row.feature}
+          {/* OTHERS */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            {row.rest === "partial" ? (
+              <div
+                style={{
+                  background: "rgba(234,179,8,0.14)",
+                  color: "#ca8a04",
+                  borderRadius: 999,
+                  padding: "8px 16px",
+                  fontWeight: 700,
+                  fontSize: "0.8rem",
+                  minWidth: 100,
+                  textAlign: "center",
+                }}
+              >
+                ⚠ Partial
               </div>
-              {/* QUENCH */}
-              <div style={{padding:"15px 28px",borderLeft:`1px solid ${BR}`,
-                background:d?"rgba(255,228,94,0.05)":"rgba(255,228,94,0.07)",
-                display:"flex",alignItems:"center",gap:8}}>
-                <span style={{width:24,height:24,borderRadius:"50%",background:"rgba(34,197,94,0.15)",
-                  display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:"0.8rem"}}>✅</span>
-                <span style={{fontSize:"0.8rem",fontWeight:700,color:"#16a34a"}}>Yes</span>
+            ) : (
+              <div
+                style={{
+                  background: "rgba(239,68,68,0.12)",
+                  color: "#ef4444",
+                  borderRadius: 999,
+                  padding: "8px 16px",
+                  fontWeight: 700,
+                  fontSize: "0.8rem",
+                  minWidth: 90,
+                  textAlign: "center",
+                }}
+              >
+                ❌ No
               </div>
-              {/* competitor */}
-              <div style={{padding:"15px 28px",borderLeft:`1px solid ${BR}`,display:"flex",alignItems:"center",gap:8}}>
-                {row.rest==="partial"?(
-                  <>
-                    <span style={{width:24,height:24,borderRadius:"50%",background:"rgba(234,179,8,0.15)",
-                      display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:"0.8rem"}}>⚠️</span>
-                    <span style={{fontSize:"0.8rem",fontWeight:700,color:"#ca8a04"}}>Sometimes</span>
-                  </>
-                ):(
-                  <>
-                    <span style={{width:24,height:24,borderRadius:"50%",background:"rgba(239,68,68,0.12)",
-                      display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:"0.8rem"}}>❌</span>
-                    <span style={{fontSize:"0.8rem",fontWeight:700,color:"#ef4444"}}>No</span>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {/* footnote */}
-          <div style={{padding:"16px 28px",background:d?"rgba(255,228,94,0.05)":"rgba(255,228,94,0.08)",
-            borderTop:`1px solid ${BR}`,display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:"0.95rem"}}>💡</span>
-            <span style={{fontSize:"0.75rem",color:MT}}>
-              Based on ingredient analysis of top-selling iced tea brands in India, 2024.
-            </span>
+            )}
           </div>
         </div>
-      </section>
+      ))}
+    </div>
+
+    {/* MOBILE CARDS */}
+    <div className="compare-mobile">
+      {COMPARE.map((row, ri) => (
+        <div
+          key={ri}
+          style={{
+            padding: 20,
+            borderBottom:
+              ri !== COMPARE.length - 1
+                ? `1px solid ${BR}`
+                : "none",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              color: TX,
+              marginBottom: 16,
+              fontSize: "0.95rem",
+              lineHeight: 1.5,
+            }}
+          >
+            {row.feature}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            {/* QUENCH */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "rgba(34,197,94,0.08)",
+                borderRadius: 14,
+                padding: "12px 14px",
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: TX,
+                  fontSize: "0.82rem",
+                }}
+              >
+                QUENCH
+              </span>
+
+              <span
+                style={{
+                  color: "#16a34a",
+                  fontWeight: 700,
+                  fontSize: "0.82rem",
+                }}
+              >
+                ✅ Yes
+              </span>
+            </div>
+
+            {/* OTHERS */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background:
+                  row.rest === "partial"
+                    ? "rgba(234,179,8,0.08)"
+                    : "rgba(239,68,68,0.08)",
+                borderRadius: 14,
+                padding: "12px 14px",
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: TX,
+                  fontSize: "0.82rem",
+                }}
+              >
+                Others
+              </span>
+
+              <span
+                style={{
+                  color:
+                    row.rest === "partial"
+                      ? "#ca8a04"
+                      : "#ef4444",
+                  fontWeight: 700,
+                  fontSize: "0.82rem",
+                }}
+              >
+                {row.rest === "partial"
+                  ? "⚠ Partial"
+                  : "❌ No"}
+              </span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* FOOTER */}
+    <div
+      style={{
+        padding: "22px 24px",
+        borderTop: `1px solid ${BR}`,
+        background: d
+          ? "rgba(255,228,94,0.04)"
+          : "rgba(255,228,94,0.08)",
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 16,
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <div
+          className="bb"
+          style={{
+            fontSize: "2.2rem",
+            color: YLW,
+          }}
+        >
+          8/8
+        </div>
+
+        <div>
+          <div
+            style={{
+              fontWeight: 700,
+              color: TX,
+              fontSize: "0.92rem",
+            }}
+          >
+            Clean Ingredient Score
+          </div>
+
+          <div
+            style={{
+              color: MT,
+              fontSize: "0.75rem",
+            }}
+          >
+            Based on popular iced tea brands
+          </div>
+        </div>
+      </div>
+
+      <a href="#waitlist">
+        <button
+          className="pill py"
+          style={{
+            padding: "13px 22px",
+            fontSize: "0.85rem",
+          }}
+        >
+          Try QUENCH →
+        </button>
+      </a>
+    </div>
+  </div>
+
+  {/* RESPONSIVE CSS */}
+  <style>{`
+    .compare-mobile{
+      display:none;
+    }
+
+    @media(max-width:768px){
+
+      .compare-desktop{
+        display:none;
+      }
+
+      .compare-mobile{
+        display:block;
+      }
+
+    }
+  `}</style>
+</section>
 
       {/* ── STORY ── */}
       <section id="story" style={{padding:"110px 6%",background:BG}}>
