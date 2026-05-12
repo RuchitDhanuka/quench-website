@@ -365,14 +365,8 @@ export default function App() {
       </section>
 
       {/* ── WHY + COMPARE ── */}
-<section
-  id="why"
-  style={{
-    padding: "110px 6%",
-    background: BG2,
-  }}
->
-  {/* HEADING */}
+{/* ── WHY + COMPARE ── */}
+<section id="why" style={{ padding: "110px 6%", background: BG2 }}>
   <div style={{ marginBottom: 54 }}>
     <div className="sl" style={{ marginBottom: 14 }}>
       WHY QUENCH
@@ -403,9 +397,9 @@ export default function App() {
   <div
     style={{
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-      gap: 18,
-      marginBottom: 60,
+      gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))",
+      gap: 16,
+      marginBottom: 70,
     }}
   >
     {WHY.map((w, i) => (
@@ -414,26 +408,20 @@ export default function App() {
         className="wcard"
         style={{
           background: CARD,
-          borderRadius: 24,
+          borderRadius: 22,
           padding: 28,
           border: `1.5px solid ${BR}`,
-          transition: "0.3s",
         }}
       >
-        <div
-          style={{
-            fontSize: "2.2rem",
-            marginBottom: 14,
-          }}
-        >
+        <div style={{ fontSize: "2.1rem", marginBottom: 12 }}>
           {w.icon}
         </div>
 
         <h3
           className="bb"
           style={{
-            fontSize: "1.7rem",
-            marginBottom: 10,
+            fontSize: "1.65rem",
+            marginBottom: 8,
             letterSpacing: "1px",
             color: TX,
           }}
@@ -445,7 +433,7 @@ export default function App() {
           style={{
             color: MT,
             lineHeight: 1.75,
-            fontSize: "0.88rem",
+            fontSize: "0.85rem",
           }}
         >
           {w.desc}
@@ -454,420 +442,206 @@ export default function App() {
     ))}
   </div>
 
-  {/* ───────────── COMPARISON SECTION ───────────── */}
+  {/* ── QUENCH VS REST ── */}
   <div
     style={{
       background: CARD,
-      borderRadius: 30,
-      border: `1.5px solid ${BR}`,
+      borderRadius: 28,
+      border: `1px solid ${BR}`,
       overflow: "hidden",
-      boxShadow: d
-        ? "none"
-        : "0 10px 35px rgba(0,0,0,0.05)",
     }}
   >
-    {/* TOP HEADER */}
+    {/* Heading */}
     <div
       style={{
-        padding: "32px 24px",
+        padding: "30px 24px",
         borderBottom: `1px solid ${BR}`,
-        background: d
-          ? "rgba(255,255,255,0.015)"
-          : "rgba(255,228,94,0.08)",
+        textAlign: "center",
       }}
     >
       <div
-        className="bb"
         style={{
-          fontSize: "clamp(2.2rem,5vw,3.5rem)",
+          fontSize: "0.7rem",
+          fontWeight: 700,
           letterSpacing: "2px",
+          color: "#888",
           marginBottom: 10,
-          color: TX,
         }}
       >
         QUENCH VS THE REST
       </div>
 
-      <p
+      <h3
+        className="bb"
         style={{
-          color: MT,
-          lineHeight: 1.8,
-          fontSize: "0.92rem",
-          maxWidth: 650,
+          fontSize: "clamp(2rem,5vw,3.5rem)",
+          color: TX,
+          letterSpacing: "2px",
         }}
       >
-        Most iced tea brands are loaded with sugar,
-        preservatives and artificial ingredients.
-        QUENCH keeps it clean, refreshing and honest.
-      </p>
+        CLEANER. LIGHTER.
+        <br />
+        <span style={{ color: YLW }}>BETTER.</span>
+      </h3>
     </div>
 
-    {/* DESKTOP TABLE */}
-    <div className="compare-desktop">
-      {/* TABLE HEAD */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.5fr 1fr 1fr",
-          padding: "18px 24px",
-          borderBottom: `1px solid ${BR}`,
-          background: d
-            ? "rgba(255,255,255,0.02)"
-            : "rgba(0,0,0,0.02)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "0.78rem",
-            fontWeight: 700,
-            letterSpacing: "1.5px",
-            color: "#888",
-            textTransform: "uppercase",
-          }}
-        >
-          Feature
-        </div>
-
-        <div
-          style={{
-            textAlign: "center",
-          }}
-        >
-          <div
-            className="bb"
-            style={{
-              fontSize: "1.5rem",
-              color: "#16a34a",
-              letterSpacing: "2px",
-            }}
-          >
-            QUENCH
-          </div>
-        </div>
-
-        <div
-          style={{
-            textAlign: "center",
-          }}
-        >
-          <div
-            className="bb"
-            style={{
-              fontSize: "1.5rem",
-              color: "#ef4444",
-              letterSpacing: "2px",
-            }}
-          >
-            OTHERS
-          </div>
-        </div>
-      </div>
-
-      {/* ROWS */}
-      {COMPARE.map((row, ri) => (
-        <div
-          key={ri}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.5fr 1fr 1fr",
-            alignItems: "center",
-            padding: "18px 24px",
-            borderBottom:
-              ri !== COMPARE.length - 1
-                ? `1px solid ${BR}`
-                : "none",
-            background:
-              ri % 2 === 0
-                ? "transparent"
-                : d
-                ? "rgba(255,255,255,0.01)"
-                : "rgba(0,0,0,0.015)",
-          }}
-        >
-          {/* FEATURE */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              color: TX,
-              fontWeight: 600,
-              fontSize: "0.9rem",
-            }}
-          >
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: YLW,
-                flexShrink: 0,
-              }}
-            />
-
-            {row.feature}
-          </div>
-
-          {/* QUENCH */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(34,197,94,0.12)",
-                color: "#16a34a",
-                borderRadius: 999,
-                padding: "8px 16px",
-                fontWeight: 700,
-                fontSize: "0.8rem",
-                minWidth: 90,
-                textAlign: "center",
-              }}
-            >
-              ✅ Yes
-            </div>
-          </div>
-
-          {/* OTHERS */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            {row.rest === "partial" ? (
-              <div
-                style={{
-                  background: "rgba(234,179,8,0.14)",
-                  color: "#ca8a04",
-                  borderRadius: 999,
-                  padding: "8px 16px",
-                  fontWeight: 700,
-                  fontSize: "0.8rem",
-                  minWidth: 100,
-                  textAlign: "center",
-                }}
-              >
-                ⚠ Partial
-              </div>
-            ) : (
-              <div
-                style={{
-                  background: "rgba(239,68,68,0.12)",
-                  color: "#ef4444",
-                  borderRadius: 999,
-                  padding: "8px 16px",
-                  fontWeight: 700,
-                  fontSize: "0.8rem",
-                  minWidth: 90,
-                  textAlign: "center",
-                }}
-              >
-                ❌ No
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-
-    {/* MOBILE CARDS */}
-    <div className="compare-mobile">
-      {COMPARE.map((row, ri) => (
-        <div
-          key={ri}
-          style={{
-            padding: 20,
-            borderBottom:
-              ri !== COMPARE.length - 1
-                ? `1px solid ${BR}`
-                : "none",
-          }}
-        >
-          <div
-            style={{
-              fontWeight: 700,
-              color: TX,
-              marginBottom: 16,
-              fontSize: "0.95rem",
-              lineHeight: 1.5,
-            }}
-          >
-            {row.feature}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-            }}
-          >
-            {/* QUENCH */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                background: "rgba(34,197,94,0.08)",
-                borderRadius: 14,
-                padding: "12px 14px",
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: TX,
-                  fontSize: "0.82rem",
-                }}
-              >
-                QUENCH
-              </span>
-
-              <span
-                style={{
-                  color: "#16a34a",
-                  fontWeight: 700,
-                  fontSize: "0.82rem",
-                }}
-              >
-                ✅ Yes
-              </span>
-            </div>
-
-            {/* OTHERS */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                background:
-                  row.rest === "partial"
-                    ? "rgba(234,179,8,0.08)"
-                    : "rgba(239,68,68,0.08)",
-                borderRadius: 14,
-                padding: "12px 14px",
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: TX,
-                  fontSize: "0.82rem",
-                }}
-              >
-                Others
-              </span>
-
-              <span
-                style={{
-                  color:
-                    row.rest === "partial"
-                      ? "#ca8a04"
-                      : "#ef4444",
-                  fontWeight: 700,
-                  fontSize: "0.82rem",
-                }}
-              >
-                {row.rest === "partial"
-                  ? "⚠ Partial"
-                  : "❌ No"}
-              </span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-
-    {/* FOOTER */}
+    {/* Table Header */}
     <div
       style={{
-        padding: "22px 24px",
-        borderTop: `1px solid ${BR}`,
+        display: "grid",
+        gridTemplateColumns: "1.5fr 1fr 1fr",
+        padding: "18px 22px",
+        borderBottom: `1px solid ${BR}`,
         background: d
-          ? "rgba(255,228,94,0.04)"
-          : "rgba(255,228,94,0.08)",
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 16,
-        justifyContent: "space-between",
-        alignItems: "center",
+          ? "rgba(255,255,255,0.02)"
+          : "rgba(0,0,0,0.02)",
       }}
     >
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
+          fontSize: "0.72rem",
+          fontWeight: 700,
+          letterSpacing: "1.5px",
+          color: "#888",
         }}
       >
+        FEATURES
+      </div>
+
+      <div
+        style={{
+          textAlign: "center",
+          fontSize: "0.78rem",
+          fontWeight: 800,
+          color: TX,
+          letterSpacing: "1px",
+        }}
+      >
+        QUENCH
+      </div>
+
+      <div
+        style={{
+          textAlign: "center",
+          fontSize: "0.78rem",
+          fontWeight: 800,
+          color: "#888",
+          letterSpacing: "1px",
+        }}
+      >
+        OTHERS
+      </div>
+    </div>
+
+    {/* Rows */}
+    {COMPARE.map((row, ri) => (
+      <div
+        key={ri}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.5fr 1fr 1fr",
+          alignItems: "center",
+          padding: "18px 22px",
+          borderBottom:
+            ri !== COMPARE.length - 1
+              ? `1px solid ${BR}`
+              : "none",
+          background:
+            ri % 2 === 0
+              ? "transparent"
+              : d
+              ? "rgba(255,255,255,0.015)"
+              : "rgba(0,0,0,0.015)",
+        }}
+      >
+        {/* Feature */}
         <div
-          className="bb"
           style={{
-            fontSize: "2.2rem",
-            color: YLW,
+            fontSize: "0.86rem",
+            fontWeight: 600,
+            color: TX,
+            lineHeight: 1.5,
+            paddingRight: 10,
           }}
         >
-          8/8
+          {row.feature}
         </div>
 
-        <div>
+        {/* Quench */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <div
             style={{
-              fontWeight: 700,
-              color: TX,
-              fontSize: "0.92rem",
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              background: "rgba(34,197,94,0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1rem",
             }}
           >
-            Clean Ingredient Score
+            ✅
           </div>
+        </div>
 
+        {/* Others */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <div
             style={{
-              color: MT,
-              fontSize: "0.75rem",
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              background:
+                row.rest === "partial"
+                  ? "rgba(234,179,8,0.12)"
+                  : "rgba(239,68,68,0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1rem",
             }}
           >
-            Based on popular iced tea brands
+            {row.rest === "partial" ? "⚠️" : "❌"}
           </div>
         </div>
       </div>
+    ))}
 
-      <a href="#waitlist">
-        <button
-          className="pill py"
-          style={{
-            padding: "13px 22px",
-            fontSize: "0.85rem",
-          }}
-        >
-          Try QUENCH →
-        </button>
-      </a>
+    {/* Footer */}
+    <div
+      style={{
+        padding: "16px 22px",
+        textAlign: "center",
+        borderTop: `1px solid ${BR}`,
+        background: d
+          ? "rgba(255,255,255,0.02)"
+          : "rgba(0,0,0,0.02)",
+      }}
+    >
+      <span
+        style={{
+          fontSize: "0.75rem",
+          color: MT,
+          lineHeight: 1.6,
+        }}
+      >
+        Minimal ingredients. Maximum refreshment.
+      </span>
     </div>
   </div>
-
-  {/* RESPONSIVE CSS */}
-  <style>{`
-    .compare-mobile{
-      display:none;
-    }
-
-    @media(max-width:768px){
-
-      .compare-desktop{
-        display:none;
-      }
-
-      .compare-mobile{
-        display:block;
-      }
-
-    }
-  `}</style>
 </section>
 
       {/* ── STORY ── */}
