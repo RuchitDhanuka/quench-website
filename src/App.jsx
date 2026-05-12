@@ -87,11 +87,11 @@ export default function App() {
   const [email, setEmail]           = useState("");
   const [sending, setSending]       = useState(false);
   const [done, setDone]             = useState(false);
-  const [wCount, setWCount]         = useState(247);
+  const [wCount, setWCount]         = useState(249);
   const statsRef = useRef(null);
   const CANS = ["/images/lemon-can.png", "/images/peach-can.png"];
 
-  const c1 = useCountup(247, 1800, statsOn);
+  const c1 = useCountup(240, 1800, statsOn);
   const c2 = useCountup(100, 1800, statsOn);
   const c3 = useCountup(0,   1800, statsOn);
 
@@ -121,35 +121,79 @@ export default function App() {
   }, []);
 
   /* EmailJS submit + local storage */
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setSending(true);
-    const entry = { name: name || "Friend", email, ts: new Date().toISOString() };
-    try {
-      if (!window.emailjs) {
-        await new Promise((res, rej) => {
-          const s = document.createElement("script");
-          s.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
-          s.onload = res; s.onerror = rej;
-          document.head.appendChild(s);
-        });
-        window.emailjs.init(EJS_KEY);
-      }
-      await window.emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+  const GOOGLE_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbwTS_0LigIs3Oj136fSd2kakjLSP8WzTBZE_A8aGxkP0NJfbeu03D6VBmcUPyaUQm4ksA/exec";
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  setSending(true);
+
+  const entry = {
+    name: name || "Friend",
+    email: email,
+    timestamp: new Date().toISOString(),
+  };
+
+  try {
+
+    /* ───────── GOOGLE SHEETS ───────── */
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(entry),
+    });
+
+    /* ───────── EMAILJS ───────── */
+    if (!window.emailjs) {
+      await new Promise((res, rej) => {
+        const s = document.createElement("script");
+
+        s.src =
+          "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
+
+        s.onload = res;
+        s.onerror = rej;
+
+        document.head.appendChild(s);
+      });
+
+      window.emailjs.init(EJS_KEY);
+    }
+
+    await window.emailjs.send(
+      EJS_SERVICE,
+      EJS_TEMPLATE,
+      {
         to_name: name || "Friend",
         to_email: email,
         reply_to: email,
-      });
-    } catch (err) {
-      /* EmailJS not configured yet – fail silently, still save */
-      console.warn("EmailJS not configured – saved locally only.", err);
-    }
-    saveLocal(entry);
-    setDone(true);
-    setWCount(c => c + 1);
-    setSending(false);
-  };
+      }
+    );
 
+    /* ───────── LOCAL BACKUP ───────── */
+    saveLocal(entry);
+
+    /* ───────── SUCCESS ───────── */
+    setDone(true);
+
+    setWCount((c) => c + 1);
+
+  } catch (err) {
+
+    console.error("Submission Error:", err);
+
+    alert("Something went wrong.");
+
+  } finally {
+
+    setSending(false);
+
+  }
+};
   /* ── Design tokens (dark/light) ── */
   const d    = dark;
   const BG   = d ? "#0e0e0e" : "#FAFAF7";
@@ -331,8 +375,9 @@ export default function App() {
               </div>
               <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
                 {f.notes.map(n=><span key={n} style={{background:d?"#2a2a2a":"#f4f4ef",borderRadius:999,
-                  padding:"4px 12px",fontSize:"0.67rem",fontWeight:600,color:MT}}>{n}</span>)}
+                  padding:"4px 20px", fontSize:"0.67rem",fontWeight:600,color:MT}}>{n}</span>)}
               </div>
+              <br />
               <h3 className="bb" style={{fontSize:"2.4rem",marginBottom:8,letterSpacing:"1px",color:TX}}>{f.name}</h3>
               <p style={{color:MT,lineHeight:1.75,marginBottom:26,fontSize:"0.87rem"}}>{f.desc}</p>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -771,7 +816,7 @@ export default function App() {
               onMouseOver={e=>e.target.style.color="#888"} onMouseOut={e=>e.target.style.color="#2a2a2a"}>{l}</a>
           ))}
         </div>
-        <div style={{color:"#1a1a1a",fontSize:"0.65rem"}}>© 2025 QUENCH BEVERAGES PVT LTD · MADE IN INDIA 🇮🇳</div>
+        <div style={{color:"#ffffff",fontSize:"0.65rem"}}>© 2025 QUENCH BEVERAGES PVT LTD · MADE IN INDIA 🇮🇳</div>
       </footer>
 
       {/* ── FLAVOUR MODAL ── */}
