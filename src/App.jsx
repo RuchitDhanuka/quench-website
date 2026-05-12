@@ -580,7 +580,7 @@ export default function App() {
               width: 34,
               height: 34,
               borderRadius: "50%",
-              background: "rgba(34,197,94,0.12)",
+              // background: "rgba(34,197,94,0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -604,10 +604,10 @@ export default function App() {
               width: 34,
               height: 34,
               borderRadius: "50%",
-              background:
-                row.rest === "partial"
-                  ? "rgba(234,179,8,0.12)"
-                  : "rgba(239,68,68,0.12)",
+              // background:
+              //   row.rest === "partial"
+              //     ? "rgba(234,179,8,0.12)"
+              //     : "rgba(239,68,68,0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
