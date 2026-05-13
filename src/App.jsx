@@ -1,16 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   EMAILJS SETUP  (free tier = 200 emails/month)
-   1. Create account at https://www.emailjs.com
-   2. Add an Email Service (Gmail works great)
-   3. Create a Template with these variables:
-        {{to_name}}   {{to_email}}   {{reply_to}}
-   4. Paste your IDs below
+   EMAILJS  (free tier = 200 emails / month)
+   Uses the REST API directly — no CDN / SDK race condition.
+   Docs: https://www.emailjs.com/docs/rest-api/send/
 ────────────────────────────────────────────────────────────────────────────── */
 const EJS_SERVICE  = "service_12blv4h";
 const EJS_TEMPLATE = "template_zqfza0j";
 const EJS_KEY      = "2qiVqozantoDGpwH2";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GOOGLE APPS SCRIPT  — paste your deployed Web App URL here.
+   The script must:
+     • Accept POST with Content-Type application/json
+     • Write to a sheet called "Waitlist" (columns: Timestamp | Name | Email)
+   See README for a sample doPost() script.
+────────────────────────────────────────────────────────────────────────────── */
+const GOOGLE_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbwR5Z8acXC8lBe74WxJEoGhqcGRswQTjxU5j9qMAmjdfZfuzYbODCRE5PemSzrjE97e/exec";
 
 /* ── Data ── */
 const FLAVOURS = [
@@ -36,21 +43,44 @@ const WHY = [
   { icon: "🍃", title: "Real Brewed Tea",  desc: "Whole-leaf tea, brewed slow and cold for a genuinely clean flavour profile." },
   { icon: "⚡", title: "Zero Sugar",        desc: "Naturally sweetened. No spikes, no crash. Just clean hydration all day." },
   { icon: "🧪", title: "No Preservatives", desc: "If you can't pronounce it, we don't add it. Minimal ingredients, maximum refreshment." },
-  // { icon: "🎯", title: "Gen-Z Energy",      desc: "Built for creators, athletes and people who move fast. No compromise." },
 ];
 
 const COMPARE = [
-  { feature: "Real Brewed Tea",        quench: true,      rest: false },
-  { feature: "Zero Added Sugar",       quench: true,      rest: false },
-  { feature: "No Preservatives",       quench: true,      rest: false },
-  { feature: "No Artificial Colours",  quench: true,      rest: false },
-  { feature: "No Artificial Flavour",  quench: true,      rest: false },
-  { feature: "Recyclable Packaging",   quench: true,      rest: "partial" },
-  { feature: "Sub-10 Ingredients",     quench: true,      rest: false },
-  { feature: "Stevia-Sweetened",       quench: true,      rest: false },
+  { feature: "Real Brewed Tea",        quench: true, rest: false },
+  { feature: "Zero Added Sugar",       quench: true, rest: false },
+  { feature: "No Preservatives",       quench: true, rest: false },
+  { feature: "No Artificial Colours",  quench: true, rest: false },
+  { feature: "No Artificial Flavour",  quench: true, rest: false },
+  { feature: "Recyclable Packaging",   quench: true, rest: "partial" },
+  { feature: "Sub-10 Ingredients",     quench: true, rest: false },
+  { feature: "Stevia-Sweetened",       quench: true, rest: false },
 ];
 
 const MARQUEE = ["REAL TEA","ZERO SUGAR","NO PRESERVATIVES","CLEAN LABEL","BREWED SLOW","100% HONEST"];
+
+/* ── Culture tiles — drop your images into /images/ with these filenames ── */
+const CULTURE = [
+  {
+    img: "/images/culture-1.png",
+    tag: "THE RITUAL",
+    caption: "Morning hits different when the can slaps.",
+  },
+  {
+    img: "/images/culture-2.png",
+    tag: "ON THE MOVE",
+    caption: "Zero sugar. Full send.",
+  },
+  {
+    img: "/images/culture-3.png",
+    tag: "THE VIBE",
+    caption: "Clean label, chaotic energy.",
+  },
+  {
+    img: "/images/culture-4.png",
+    tag: "GEN-Z APPROVED",
+    caption: "No cap, no crash.",
+  },
+];
 
 /* ── Helpers ── */
 function useCountup(target, duration = 1800, active = false) {
@@ -70,10 +100,45 @@ function useCountup(target, duration = 1800, active = false) {
 }
 
 function saveLocal(entry) {
-  const KEY = "quench_waitlist";
-  const list = JSON.parse(localStorage.getItem(KEY) || "[]");
-  list.push(entry);
-  localStorage.setItem(KEY, JSON.stringify(list));
+  try {
+    const KEY = "quench_waitlist";
+    const list = JSON.parse(localStorage.getItem(KEY) || "[]");
+    list.push(entry);
+    localStorage.setItem(KEY, JSON.stringify(list));
+  } catch (_) {}
+}
+
+/* ── EmailJS via REST — no SDK required ── */
+async function sendEmail({ name, email }) {
+  const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      service_id:  EJS_SERVICE,
+      template_id: EJS_TEMPLATE,
+      user_id:     EJS_KEY,
+      template_params: {
+        to_name:  name || "Friend",
+        to_email: email,
+        reply_to: email,
+      },
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`EmailJS error ${res.status}: ${text}`);
+  }
+}
+
+/* ── Google Sheets via Apps Script ── */
+async function saveToSheet(entry) {
+  // no-cors means we can't read the response body, but the request fires.
+  await fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry),
+  });
 }
 
 /* ── Main component ── */
@@ -87,6 +152,7 @@ export default function App() {
   const [email, setEmail]           = useState("");
   const [sending, setSending]       = useState(false);
   const [done, setDone]             = useState(false);
+  const [submitErr, setSubmitErr]   = useState("");
   const [wCount, setWCount]         = useState(249);
   const statsRef = useRef(null);
   const CANS = ["/images/lemon-can.png", "/images/peach-can.png"];
@@ -95,7 +161,6 @@ export default function App() {
   const c2 = useCountup(100, 1800, statsOn);
   const c3 = useCountup(0,   1800, statsOn);
 
-  /* dark-mode system listener */
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme:dark)");
     const fn = e => setDark(e.matches);
@@ -120,88 +185,45 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
-  /* EmailJS submit + local storage */
-  const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwTS_0LigIs3Oj136fSd2kakjLSP8WzTBZE_A8aGxkP0NJfbeu03D6VBmcUPyaUQm4ksA/exec";
+  /* ── Submit handler ── */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitErr("");
+    if (!email) { setSubmitErr("Please enter your email."); return; }
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    setSending(true);
+    const entry = { name: name || "Friend", email, ts: new Date().toISOString() };
 
-  setSending(true);
+    try {
+      /* 1 — Send confirmation email via EmailJS REST */
+      await sendEmail(entry);
 
-  const entry = {
-    name: name || "Friend",
-    email: email,
-    timestamp: new Date().toISOString(),
+      /* 2 — Save to Google Sheet (fire-and-forget; no-cors) */
+      saveToSheet(entry).catch(() => {}); // don't block UI on sheet errors
+
+      /* 3 — Persist locally */
+      saveLocal(entry);
+
+      setDone(true);
+      setWCount(c => c + 1);
+      setName("");
+      setEmail("");
+    } catch (err) {
+      console.error("Submission error:", err);
+      setSubmitErr("Something went wrong. Please try again or email us directly.");
+    } finally {
+      setSending(false);
+    }
   };
 
-  try {
-
-    /* ───────── GOOGLE SHEETS ───────── */
-    await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(entry),
-    });
-
-    /* ───────── EMAILJS ───────── */
-    if (!window.emailjs) {
-      await new Promise((res, rej) => {
-        const s = document.createElement("script");
-
-        s.src =
-          "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
-
-        s.onload = res;
-        s.onerror = rej;
-
-        document.head.appendChild(s);
-      });
-
-      window.emailjs.init(EJS_KEY);
-    }
-
-    await window.emailjs.send(
-      EJS_SERVICE,
-      EJS_TEMPLATE,
-      {
-        to_name: name || "Friend",
-        to_email: email,
-        reply_to: email,
-      }
-    );
-
-    /* ───────── LOCAL BACKUP ───────── */
-    saveLocal(entry);
-
-    /* ───────── SUCCESS ───────── */
-    setDone(true);
-
-    setWCount((c) => c + 1);
-
-  } catch (err) {
-
-    console.error("Submission Error:", err);
-
-    alert("Something went wrong.");
-
-  } finally {
-
-    setSending(false);
-
-  }
-};
-  /* ── Design tokens (dark/light) ── */
+  /* ── Design tokens ── */
   const d    = dark;
   const BG   = d ? "#0e0e0e" : "#FAFAF7";
   const BG2  = d ? "#161616" : "#F5F4EF";
   const CARD = d ? "#1c1c1c" : "#ffffff";
   const TX   = d ? "#f0f0f0" : "#111111";
   const MT   = d ? "#888888" : "#666666";
-  const BR   = d ? "rgba(255, 255, 255, 0.07)" : "rgba(255, 255, 255, 0.07)";
+  const BR   = d ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)";
   const YLW  = "#FFE45E";
   const navBG = scrollY > 40
     ? (d ? "rgba(14,14,14,0.92)" : "rgba(250,250,247,0.92)")
@@ -220,6 +242,7 @@ const handleSubmit = async (e) => {
         @keyframes pulse{0%{transform:scale(0.88);opacity:0.65}100%{transform:scale(1.45);opacity:0}}
         @keyframes shimmer{0%,100%{opacity:0.3}50%{opacity:1}}
         @keyframes canIn{from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:scale(1)}}
+        @keyframes cultureReveal{from{opacity:0;transform:translateY(40px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
         .fu{animation:fadeUp 0.75s both;}
         .fc{animation:floatCan 6s ease-in-out infinite;}
         .ci{animation:canIn 0.45s ease both;}
@@ -235,16 +258,30 @@ const handleSubmit = async (e) => {
         .wcard:hover{transform:translateY(-8px);}
         .wcard{transition:transform 0.28s;}
         .inp{border-radius:999px;padding:14px 22px;font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border 0.2s;width:100%;}
+        .inp:focus{border-color:#FFE45E!important;}
         .sl{font-size:0.7rem;font-weight:700;letter-spacing:3px;color:#888;text-transform:uppercase;}
         .ov{position:fixed;inset:0;background:rgba(0,0,0,0.68);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);animation:fadeUp 0.18s both;}
         .mi{border-radius:32px;padding:44px;max-width:500px;width:92%;position:relative;max-height:90vh;overflow-y:auto;}
-        /* hero orbit tags */
         .orb{position:absolute;display:flex;align-items:center;gap:7px;border-radius:999px;padding:9px 16px;font-size:0.71rem;font-weight:700;letter-spacing:0.8px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(12px);}
+        /* Culture grid */
+        .cult-grid{display:grid;gap:14px;grid-template-columns:repeat(4,1fr);}
+        .cult-card{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:3/4;cursor:pointer;}
+        .cult-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94);}
+        .cult-card:hover img{transform:scale(1.07);}
+        .cult-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0) 55%);}
+        .cult-text{position:absolute;bottom:18px;left:18px;right:18px;}
+        .cult-tag{display:inline-block;background:rgba(255,228,94,1);color:#111;font-size:0.58rem;font-weight:800;letter-spacing:2px;border-radius:999px;padding:3px 10px;margin-bottom:6px;}
+        .cult-cap{color:white;font-size:0.82rem;font-weight:600;line-height:1.35;}
+        /* mobile */
         @media(max-width:820px){
           .hg,.sg{grid-template-columns:1fr!important;}
           .nl{display:none!important;}
           .hcc{height:400px!important;}
           .orb{display:none!important;}
+          .cult-grid{grid-template-columns:repeat(2,1fr)!important;}
+        }
+        @media(max-width:480px){
+          .cult-grid{grid-template-columns:1fr!important;}
         }
       `}</style>
 
@@ -255,8 +292,8 @@ const handleSubmit = async (e) => {
         borderBottom: scrollY>40?`1px solid ${BR}`:"none", transition:"all 0.35s" }}>
         <div className="bb" style={{fontSize:"2.1rem",letterSpacing:"4px",color:TX}}>QUENCH</div>
         <div className="nl" style={{display:"flex",gap:"34px"}}>
-          {["Flavours","Why Us","Story","Pre-order"].map((l,i)=>(
-            <a key={l} href={`#${["flavours","why","story","waitlist"][i]}`}
+          {["Flavours","Why Us","Culture","Pre-order"].map((l,i)=>(
+            <a key={l} href={`#${["flavours","why","culture","waitlist"][i]}`}
               style={{textDecoration:"none",color:TX,fontWeight:600,fontSize:"0.88rem",opacity:0.85,transition:"opacity 0.2s"}}
               onMouseOver={e=>e.target.style.opacity="0.4"}
               onMouseOut={e=>e.target.style.opacity="0.85"}>{l}</a>
@@ -271,7 +308,6 @@ const handleSubmit = async (e) => {
         <div style={{position:"absolute",width:380,height:380,background:"radial-gradient(circle,rgba(255,179,138,0.22) 0%,transparent 70%)",bottom:-80,left:-80,borderRadius:"50%",pointerEvents:"none"}}/>
 
         <div className="hg" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:60,alignItems:"center",width:"100%",position:"relative",zIndex:2}}>
-          {/* left */}
           <div>
             <div className="fu" style={{marginBottom:22,display:"inline-flex",alignItems:"center",gap:6,
               background:CARD,boxShadow:`0 4px 20px ${BR}`,borderRadius:999,padding:"8px 16px",
@@ -299,7 +335,6 @@ const handleSubmit = async (e) => {
             </div>
           </div>
 
-          {/* right — can + orbit badges */}
           <div className="hcc" style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",height:560}}>
             {[220,340,460].map((sz,i)=>(
               <div key={i} style={{position:"absolute",width:sz,height:sz,borderRadius:"50%",
@@ -308,17 +343,14 @@ const handleSubmit = async (e) => {
             ))}
             <div style={{position:"absolute",width:260,height:260,borderRadius:"50%",
               background:"rgba(255,228,94,0.38)",filter:"blur(55px)"}}/>
-
             <div className="fc" style={{position:"relative",zIndex:5}}>
               <img key={activeCan} src={CANS[activeCan]} alt="QUENCH can" className="ci"
                 style={{width:270,height:"auto",filter:"drop-shadow(0 36px 55px rgba(0,0,0,0.28))",display:"block"}}/>
             </div>
-
-            {/* Orbit badges — clean, glassmorphic, well-spaced */}
             {[
-              {txt:"⚡ Zero Sugar",        top:"9%",   left:"-2%"},
-              {txt:"🍃 Real Brewed Tea",   top:"46%",  right:"-6%"},
-              {txt:"🧪 No Preservatives",  bottom:"11%",left:"1%"},
+              {txt:"⚡ Zero Sugar",       top:"9%",  left:"-2%"},
+              {txt:"🍃 Real Brewed Tea",  top:"46%", right:"-6%"},
+              {txt:"🧪 No Preservatives", bottom:"11%",left:"1%"},
             ].map((b,i)=>(
               <div key={i} className="orb" style={{
                 top:b.top,left:b.left,right:b.right,bottom:b.bottom,
@@ -328,8 +360,6 @@ const handleSubmit = async (e) => {
                 color:TX,
               }}>{b.txt}</div>
             ))}
-
-            {/* dot switcher */}
             <div style={{position:"absolute",bottom:"-18px",display:"flex",gap:8,zIndex:10}}>
               {CANS.map((_,i)=>(
                 <button key={i} onClick={()=>setActiveCan(i)} style={{
@@ -375,9 +405,9 @@ const handleSubmit = async (e) => {
               </div>
               <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
                 {f.notes.map(n=><span key={n} style={{background:d?"#2a2a2a":"#f4f4ef",borderRadius:999,
-                  padding:"4px 20px", fontSize:"0.67rem",fontWeight:600,color:MT}}>{n}</span>)}
+                  padding:"4px 20px",fontSize:"0.67rem",fontWeight:600,color:MT}}>{n}</span>)}
               </div>
-              <br />
+              <br/>
               <h3 className="bb" style={{fontSize:"2.4rem",marginBottom:8,letterSpacing:"1px",color:TX}}>{f.name}</h3>
               <p style={{color:MT,lineHeight:1.75,marginBottom:26,fontSize:"0.87rem"}}>{f.desc}</p>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -391,7 +421,6 @@ const handleSubmit = async (e) => {
             </div>
           ))}
         </div>
-        {/* combo */}
         <div style={{marginTop:22,background:"#111",borderRadius:26,padding:"30px 36px",
           display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:16}}>
           <div>
@@ -410,288 +439,112 @@ const handleSubmit = async (e) => {
       </section>
 
       {/* ── WHY + COMPARE ── */}
-{/* ── WHY + COMPARE ── */}
-<section id="why" style={{ padding: "110px 6%", background: BG2 }}>
-  <div style={{ marginBottom: 54 }}>
-    <div className="sl" style={{ marginBottom: 14 }}>
-      WHY QUENCH
-    </div>
-
-    <h2
-      className="bb"
-      style={{
-        fontSize: "clamp(3rem,7vw,6rem)",
-        lineHeight: 0.9,
-        color: TX,
-      }}
-    >
-      BUILT
-      <br />
-      <span
-        style={{
-          color: YLW,
-          WebkitTextStroke: `1.5px ${TX}`,
-        }}
-      >
-        DIFFERENT.
-      </span>
-    </h2>
-  </div>
-
-  {/* WHY CARDS */}
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))",
-      gap: 16,
-      marginBottom: 70,
-    }}
-  >
-    {WHY.map((w, i) => (
-      <div
-        key={i}
-        className="wcard"
-        style={{
-          background: CARD,
-          borderRadius: 22,
-          padding: 28,
-          border: `1.5px solid ${BR}`,
-        }}
-      >
-        <div style={{ fontSize: "2.1rem", marginBottom: 12 }}>
-          {w.icon}
+      <section id="why" style={{padding:"110px 6%",background:BG2}}>
+        <div style={{marginBottom:54}}>
+          <div className="sl" style={{marginBottom:14}}>WHY QUENCH</div>
+          <h2 className="bb" style={{fontSize:"clamp(3rem,7vw,6rem)",lineHeight:0.9,color:TX}}>
+            BUILT<br/><span style={{color:YLW,WebkitTextStroke:`1.5px ${TX}`}}>DIFFERENT.</span>
+          </h2>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",gap:16,marginBottom:70}}>
+          {WHY.map((w,i)=>(
+            <div key={i} className="wcard" style={{background:CARD,borderRadius:22,padding:28,border:`1.5px solid ${BR}`}}>
+              <div style={{fontSize:"2.1rem",marginBottom:12}}>{w.icon}</div>
+              <h3 className="bb" style={{fontSize:"1.65rem",marginBottom:8,letterSpacing:"1px",color:TX}}>{w.title}</h3>
+              <p style={{color:MT,lineHeight:1.75,fontSize:"0.85rem"}}>{w.desc}</p>
+            </div>
+          ))}
         </div>
 
-        <h3
-          className="bb"
-          style={{
-            fontSize: "1.65rem",
-            marginBottom: 8,
-            letterSpacing: "1px",
-            color: TX,
-          }}
-        >
-          {w.title}
-        </h3>
-
-        <p
-          style={{
-            color: MT,
-            lineHeight: 1.75,
-            fontSize: "0.85rem",
-          }}
-        >
-          {w.desc}
-        </p>
-      </div>
-    ))}
-  </div>
-
-  {/* ── QUENCH VS REST ── */}
-  <div
-    style={{
-      background: CARD,
-      borderRadius: 28,
-      border: `1px solid ${BR}`,
-      overflow: "hidden",
-    }}
-  >
-    {/* Heading */}
-    <div
-      style={{
-        padding: "30px 24px",
-        borderBottom: `1px solid ${BR}`,
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "0.7rem",
-          fontWeight: 700,
-          letterSpacing: "2px",
-          color: "#888",
-          marginBottom: 10,
-        }}
-      >
-        QUENCH VS THE REST
-      </div>
-
-      <h3
-        className="bb"
-        style={{
-          fontSize: "clamp(2rem,5vw,3.5rem)",
-          color: TX,
-          letterSpacing: "2px",
-        }}
-      >
-        CLEANER. LIGHTER.
-        <br />
-        <br />
-        <span style={{ color: YLW }}>BETTER.</span>
-      </h3>
-    </div>
-
-    {/* Table Header */}
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1.5fr 1fr 1fr",
-        padding: "18px 22px",
-        borderBottom: `1px solid ${BR}`,
-        background: d
-          ? "rgba(255,255,255,0.02)"
-          : "rgba(0,0,0,0.02)",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "0.72rem",
-          fontWeight: 700,
-          letterSpacing: "1.5px",
-          color: "#888",
-        }}
-      >
-        FEATURES
-      </div>
-
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: "0.78rem",
-          fontWeight: 800,
-          color: TX,
-          letterSpacing: "1px",
-        }}
-      >
-        QUENCH
-      </div>
-
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: "0.78rem",
-          fontWeight: 800,
-          color: "#888",
-          letterSpacing: "1px",
-        }}
-      >
-        OTHERS
-      </div>
-    </div>
-
-    {/* Rows */}
-    {COMPARE.map((row, ri) => (
-      <div
-        key={ri}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.5fr 1fr 1fr",
-          alignItems: "center",
-          padding: "18px 22px",
-          borderBottom:
-            ri !== COMPARE.length - 1
-              ? `1px solid ${BR}`
-              : "none",
-          background:
-            ri % 2 === 0
-              ? "transparent"
-              : d
-              ? "rgba(255,255,255,0.015)"
-              : "rgba(0,0,0,0.015)",
-        }}
-      >
-        {/* Feature */}
-        <div
-          style={{
-            fontSize: "0.86rem",
-            fontWeight: 600,
-            color: TX,
-            lineHeight: 1.5,
-            paddingRight: 10,
-          }}
-        >
-          {row.feature}
-        </div>
-
-        {/* Quench */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: "50%",
-              // background: "rgba(34,197,94,0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1rem",
-            }}
-          >
-            ✅
+        {/* Compare table */}
+        <div style={{background:CARD,borderRadius:28,border:`1px solid ${BR}`,overflow:"hidden"}}>
+          <div style={{padding:"30px 24px",borderBottom:`1px solid ${BR}`,textAlign:"center"}}>
+            <div style={{fontSize:"0.7rem",fontWeight:700,letterSpacing:"2px",color:"#888",marginBottom:10}}>QUENCH VS THE REST</div>
+            <h3 className="bb" style={{fontSize:"clamp(2rem,5vw,3.5rem)",color:TX,letterSpacing:"2px"}}>
+              CLEANER. LIGHTER.<br/><br/><span style={{color:YLW}}>BETTER.</span>
+            </h3>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1.5fr 1fr 1fr",padding:"18px 22px",
+            borderBottom:`1px solid ${BR}`,background:d?"rgba(255,255,255,0.02)":"rgba(0,0,0,0.02)"}}>
+            {["FEATURES","QUENCH","OTHERS"].map((h,i)=>(
+              <div key={h} style={{textAlign:i===0?"left":"center",fontSize:i===0?"0.72rem":"0.78rem",
+                fontWeight:i===0?700:800,letterSpacing:"1.5px",color:i===2?"#888":TX}}>{h}</div>
+            ))}
+          </div>
+          {COMPARE.map((row,ri)=>(
+            <div key={ri} style={{display:"grid",gridTemplateColumns:"1.5fr 1fr 1fr",alignItems:"center",
+              padding:"18px 22px",borderBottom:ri!==COMPARE.length-1?`1px solid ${BR}`:"none",
+              background:ri%2===0?"transparent":d?"rgba(255,255,255,0.015)":"rgba(0,0,0,0.015)"}}>
+              <div style={{fontSize:"0.86rem",fontWeight:600,color:TX,lineHeight:1.5,paddingRight:10}}>{row.feature}</div>
+              {[true, row.rest].map((val,ci)=>(
+                <div key={ci} style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
+                  <div style={{width:34,height:34,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1rem"}}>
+                    {val===true?"✅":val==="partial"?"⚠️":"❌"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+          <div style={{padding:"16px 22px",textAlign:"center",borderTop:`1px solid ${BR}`,
+            background:d?"rgba(255,255,255,0.02)":"rgba(0,0,0,0.02)"}}>
+            <span style={{fontSize:"0.75rem",color:MT,lineHeight:1.6}}>Minimal ingredients. Maximum refreshment.</span>
           </div>
         </div>
+      </section>
 
-        {/* Others */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: "50%",
-              // background:
-              //   row.rest === "partial"
-              //     ? "rgba(234,179,8,0.12)"
-              //     : "rgba(239,68,68,0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1rem",
-            }}
-          >
-            {row.rest === "partial" ? "⚠️" : "❌"}
-          </div>
+      {/* ── CULTURE ── */}
+<section id="culture" style={{padding:"110px 6%",background:BG}}>
+        <div style={{marginBottom:54,textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center"}}>
+          <div className="sl" style={{marginBottom:14}}>THE CULTURE</div>
+          <h2 className="bb" style={{fontSize:"clamp(3rem,7vw,6rem)",lineHeight:0.9,color:TX}}>
+            THIS IS<br/><span style={{color:YLW,WebkitTextStroke:`1.5px ${TX}`}}>THE LIFE.</span>
+          </h2>
+          <p style={{color:MT,marginTop:18,fontSize:"0.96rem",maxWidth:480,lineHeight:1.8}}>
+            QUENCH isn't just a drink — it's the aesthetic. Clean living, full energy, zero compromise. Built for the ones who move different.
+          </p>
         </div>
-      </div>
-    ))}
 
-    {/* Footer */}
-    <div
-      style={{
-        padding: "16px 22px",
-        textAlign: "center",
-        borderTop: `1px solid ${BR}`,
-        background: d
-          ? "rgba(255,255,255,0.02)"
-          : "rgba(0,0,0,0.02)",
-      }}
-    >
-      <span
-        style={{
-          fontSize: "0.75rem",
-          color: MT,
-          lineHeight: 1.6,
-        }}
-      >
-        Minimal ingredients. Maximum refreshment.
-      </span>
-    </div>
-  </div>
-</section>
+        <div className="cult-grid">
+          {CULTURE.map((c,i)=>(
+            <div key={i} className="cult-card" style={{
+              animationDelay:`${i*0.1}s`,
+              /* taller first card for editorial feel */
+              ...(i===0 ? {gridRow:"span 1"} : {}),
+            }}>
+              <img
+                src={c.img}
+                alt={c.caption}
+                onError={e=>{
+                  /* fallback gradient if image not found */
+                  e.target.style.display="none";
+                  e.target.parentNode.style.background=["linear-gradient(135deg,#FFE45E,#FFB38A)","linear-gradient(135deg,#111,#333)","linear-gradient(135deg,#FFB38A,#FF7A5A)","linear-gradient(135deg,#c8f6c8,#FFE45E)"][i];
+                }}
+              />
+              <div className="cult-overlay"/>
+              <div className="cult-text">
+                <div className="cult-tag">{c.tag}</div>
+                <div className="cult-cap">{c.caption}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* bottom CTA strip */}
+        <div style={{marginTop:40,display:"flex",alignItems:"center",justifyContent:"space-between",
+          flexWrap:"wrap",gap:16,padding:"24px 32px",borderRadius:20,
+          background:d?"#111":"#111",border:`1px solid rgba(255,228,94,0.2)`}}>
+          <div>
+            <div className="bb" style={{fontSize:"1.4rem",color:"white",letterSpacing:"2px"}}>SHARE YOUR QUENCH MOMENT</div>
+            <div style={{color:"#555",fontSize:"0.78rem",marginTop:3}}>Tag us @drinkquench · Get featured</div>
+          </div>
+          <a href="https://instagram.com" target="_blank" rel="noreferrer">
+            <button className="pill py" style={{padding:"12px 22px",fontSize:"0.84rem"}}>Follow on Instagram ↗</button>
+          </a>
+        </div>
+      </section>
 
       {/* ── STORY ── */}
-      <section id="story" style={{padding:"110px 6%",background:BG}}>
+      <section id="story" style={{padding:"110px 6%",background:BG2}}>
         <div className="sg" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,alignItems:"center"}}>
           <div>
             <div className="sl" style={{marginBottom:14}}>OUR STORY</div>
@@ -766,7 +619,7 @@ const handleSubmit = async (e) => {
           </p>
 
           {!done ? (
-            <form onSubmit={handleSubmit}>
+            <div style={{width:"100%"}}>
               <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:440,margin:"0 auto"}}>
                 <input className="inp" type="text" value={name} onChange={e=>setName(e.target.value)}
                   placeholder="Your first name (optional)"
@@ -774,13 +627,16 @@ const handleSubmit = async (e) => {
                 <input className="inp" type="email" value={email} onChange={e=>setEmail(e.target.value)}
                   placeholder="your@email.com" required
                   style={{border:"1.5px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"white"}}/>
-                <button type="submit" className="pill py" disabled={sending}
+                <button onClick={handleSubmit} className="pill py" disabled={sending}
                   style={{padding:"15px",fontSize:"0.93rem",width:"100%",opacity:sending?0.7:1}}>
                   {sending?"Securing your spot…":"Claim 20% Early Access →"}
                 </button>
+                {submitErr && (
+                  <div style={{color:"#ff6b6b",fontSize:"0.8rem",textAlign:"center",marginTop:4}}>{submitErr}</div>
+                )}
               </div>
               <div style={{color:"#333",fontSize:"0.7rem",marginTop:10}}>No spam, ever. Just launch news + your exclusive discount.</div>
-            </form>
+            </div>
           ) : (
             <div style={{background:"rgba(255,255,255,0.05)",borderRadius:22,padding:"30px",
               border:"1px solid rgba(255,255,255,0.09)"}}>
@@ -790,7 +646,7 @@ const handleSubmit = async (e) => {
               </div>
               <div style={{color:"#555",fontSize:"0.86rem",lineHeight:1.7}}>
                 A confirmation is on its way to <strong style={{color:"white"}}>{email}</strong>.<br/>
-                Your 20% off code will be in the email. Welcome to the movement.
+                Your 20% off code will be in the launch email. Welcome to the movement.
               </div>
             </div>
           )}
@@ -808,7 +664,7 @@ const handleSubmit = async (e) => {
       {/* ── FOOTER ── */}
       <footer style={{padding:"52px 6%",background:"#070707",textAlign:"center"}}>
         <div className="bb" style={{fontSize:"3.6rem",letterSpacing:"8px",color:"white",marginBottom:7}}>QUENCH</div>
-        <br />
+        <br/>
         <div style={{color:"#2a2a2a",fontSize:"0.8rem",marginBottom:26}}>Tea That Hits Different. · Real. Clean. Unreal.</div>
         <div style={{display:"flex",gap:26,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
           {["Instagram","Twitter / X","hello@drinkquench.in","Privacy Policy"].map(l=>(
