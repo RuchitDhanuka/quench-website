@@ -4,10 +4,7 @@ import { useState, useEffect, useRef } from "react";
    EMAILJS  (free tier = 200 emails / month)
    Uses the REST API directly — no CDN / SDK race condition.
    Docs: https://www.emailjs.com/docs/rest-api/send/
-────────────────────────────────────────────────────────────────────────────── */
-const EJS_SERVICE  = "service_12blv4h";
-const EJS_TEMPLATE = "template_zqfza0j";
-const EJS_KEY      = "2qiVqozantoDGpwH2";
+────────────────────────────────────────────────────────────────────────────── *
 
 /* ─────────────────────────────────────────────────────────────────────────────
    GOOGLE APPS SCRIPT  — paste your deployed Web App URL here.
@@ -17,7 +14,7 @@ const EJS_KEY      = "2qiVqozantoDGpwH2";
    See README for a sample doPost() script.
 ────────────────────────────────────────────────────────────────────────────── */
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxeP1njqA5Fbg4iakdyQfTalFjQu0kmkZfkHX9snngtu61j-0I-731a6hqizMUiVpYsdg/exec";
+  "https://script.google.com/macros/s/AKfycbxL5yYGqqwcnGFvA2VkTh8wp6J5G9hSQ0yhTx9OP2j8Snsx8Jx-K_GuxTGm4-LOP8eV/exec";
 
 /* ── Data ── */
 const FLAVOURS = [
@@ -108,27 +105,6 @@ function saveLocal(entry) {
   } catch (_) {}
 }
 
-/* ── EmailJS via REST — no SDK required ── */
-async function sendEmail({ name, email }) {
-  const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      service_id:  EJS_SERVICE,
-      template_id: EJS_TEMPLATE,
-      user_id:     EJS_KEY,
-      template_params: {
-        to_name:  name || "Friend",
-        to_email: email,
-        reply_to: email,
-      },
-    }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`EmailJS error ${res.status}: ${text}`);
-  }
-}
 
 /* ── Google Sheets via Apps Script ── */
 async function saveToSheet(entry) {
@@ -137,6 +113,7 @@ async function saveToSheet(entry) {
   formData.append("name", entry.name || "Friend");
   formData.append("email", entry.email);
   formData.append("source", "QUENCH Website");
+  formData.append("timestamp", entry.ts);
 
   await fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
@@ -192,12 +169,12 @@ export default function App() {
   }, []);
 
   /* ── Submit handler ── */
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
 
   setSubmitErr("");
 
-  if (!email) {
+  if (!email.trim()) {
     setSubmitErr("Please enter your email.");
     return;
   }
@@ -205,26 +182,27 @@ export default function App() {
   setSending(true);
 
   const entry = {
-    name: name || "Friend",
-    email,
+    name: name.trim() || "Friend",
+    email: email.trim(),
     ts: new Date().toISOString(),
   };
 
-  await saveToSheet(entry);
-
-  saveLocal(entry);
-
   try {
-    await sendEmail(entry);
-  } catch (emailErr) {
-    console.warn("Email failed, but lead was saved:", emailErr);
-  }
+    await saveToSheet(entry);
 
-  setDone(true);
-  setWCount((c) => c + 1);
-  setName("");
-  setEmail("");
-  setSending(false);
+    saveLocal(entry);
+
+    setDone(true);
+    setWCount((c) => c + 1);
+    setName("");
+    setEmail("");
+  } catch (err) {
+    console.error("Submit error:", err);
+
+    setSubmitErr("Something went wrong. Please try again.");
+  } finally {
+    setSending(false);
+  }
 };
   /* ── Design tokens ── */
   const d    = dark;
