@@ -61,22 +61,22 @@ const MARQUEE = ["REAL TEA","ZERO SUGAR","NO PRESERVATIVES","CLEAN LABEL","BREWE
 /* ── Culture tiles — drop your images into /images/ with these filenames ── */
 const CULTURE = [
   {
-    img: "/images/culture-1.jpg",
+    img: "/images/culture-1.png",
     tag: "THE RITUAL",
     caption: "Morning hits different when the can slaps.",
   },
   {
-    img: "/images/culture-2.jpg",
+    img: "/images/culture-2.png",
     tag: "ON THE MOVE",
     caption: "Zero sugar. Full send.",
   },
   {
-    img: "/images/culture-3.jpg",
+    img: "/images/culture-3.png",
     tag: "THE VIBE",
     caption: "Clean label, chaotic energy.",
   },
   {
-    img: "/images/culture-4.jpg",
+    img: "/images/culture-4.png",
     tag: "GEN-Z APPROVED",
     caption: "No cap, no crash.",
   },
