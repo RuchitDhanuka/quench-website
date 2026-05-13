@@ -61,22 +61,22 @@ const MARQUEE = ["REAL TEA","ZERO SUGAR","NO PRESERVATIVES","CLEAN LABEL","BREWE
 /* ── Culture tiles — drop your images into /images/ with these filenames ── */
 const CULTURE = [
   {
-    img: "/images/culture-1.png",
+    img: "/images/culture-1.jpg",
     tag: "THE RITUAL",
     caption: "Morning hits different when the can slaps.",
   },
   {
-    img: "/images/culture-2.png",
+    img: "/images/culture-2.jpg",
     tag: "ON THE MOVE",
     caption: "Zero sugar. Full send.",
   },
   {
-    img: "/images/culture-3.png",
+    img: "/images/culture-3.jpg",
     tag: "THE VIBE",
     caption: "Clean label, chaotic energy.",
   },
   {
-    img: "/images/culture-4.png",
+    img: "/images/culture-4.jpg",
     tag: "GEN-Z APPROVED",
     caption: "No cap, no crash.",
   },
@@ -154,7 +154,9 @@ export default function App() {
   const [done, setDone]             = useState(false);
   const [submitErr, setSubmitErr]   = useState("");
   const [wCount, setWCount]         = useState(249);
-  const statsRef = useRef(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const statsRef  = useRef(null);
+  const sliderRef = useRef(null);
   const CANS = ["/images/lemon-can.png", "/images/peach-can.png"];
 
   const c1 = useCountup(240, 1800, statsOn);
@@ -263,25 +265,30 @@ export default function App() {
         .ov{position:fixed;inset:0;background:rgba(0,0,0,0.68);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);animation:fadeUp 0.18s both;}
         .mi{border-radius:32px;padding:44px;max-width:500px;width:92%;position:relative;max-height:90vh;overflow-y:auto;}
         .orb{position:absolute;display:flex;align-items:center;gap:7px;border-radius:999px;padding:9px 16px;font-size:0.71rem;font-weight:700;letter-spacing:0.8px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(12px);}
-        /* Culture grid */
+        /* Culture grid — desktop */
         .cult-grid{display:grid;gap:14px;grid-template-columns:repeat(4,1fr);}
-        .cult-card{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:3/4;cursor:pointer;}
+        .cult-card{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:3/4;cursor:pointer;flex-shrink:0;}
         .cult-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94);}
         .cult-card:hover img{transform:scale(1.07);}
         .cult-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0) 55%);}
         .cult-text{position:absolute;bottom:18px;left:18px;right:18px;}
         .cult-tag{display:inline-block;background:rgba(255,228,94,1);color:#111;font-size:0.58rem;font-weight:800;letter-spacing:2px;border-radius:999px;padding:3px 10px;margin-bottom:6px;}
         .cult-cap{color:white;font-size:0.82rem;font-weight:600;line-height:1.35;}
+        /* Culture slider — mobile only */
+        .cult-slider{display:none;}
+        .cult-slider-track{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:0 calc(14vw - 7px) 4px;scrollbar-width:none;}
+        .cult-slider-track::-webkit-scrollbar{display:none;}
+        .cult-slider-track .cult-card{width:72vw;min-width:72vw;scroll-snap-align:center;}
+        .cult-dots{display:flex;justify-content:center;gap:7px;margin-top:20px;}
+        .cult-dot{height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all 0.3s;}
         /* mobile */
         @media(max-width:820px){
           .hg,.sg{grid-template-columns:1fr!important;}
           .nl{display:none!important;}
           .hcc{height:400px!important;}
           .orb{display:none!important;}
-          .cult-grid{grid-template-columns:repeat(2,1fr)!important;}
-        }
-        @media(max-width:480px){
-          .cult-grid{grid-template-columns:1fr!important;}
+          .cult-grid{display:none!important;}
+          .cult-slider{display:block!important;}
         }
       `}</style>
 
@@ -493,7 +500,7 @@ export default function App() {
       </section>
 
       {/* ── CULTURE ── */}
-<section id="culture" style={{padding:"110px 6%",background:BG}}>
+      <section id="culture" style={{padding:"110px 6%",background:BG}}>
         <div style={{marginBottom:54,textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center"}}>
           <div className="sl" style={{marginBottom:14}}>THE CULTURE</div>
           <h2 className="bb" style={{fontSize:"clamp(3rem,7vw,6rem)",lineHeight:0.9,color:TX}}>
@@ -506,20 +513,9 @@ export default function App() {
 
         <div className="cult-grid">
           {CULTURE.map((c,i)=>(
-            <div key={i} className="cult-card" style={{
-              animationDelay:`${i*0.1}s`,
-              /* taller first card for editorial feel */
-              ...(i===0 ? {gridRow:"span 1"} : {}),
-            }}>
-              <img
-                src={c.img}
-                alt={c.caption}
-                onError={e=>{
-                  /* fallback gradient if image not found */
-                  e.target.style.display="none";
-                  e.target.parentNode.style.background=["linear-gradient(135deg,#FFE45E,#FFB38A)","linear-gradient(135deg,#111,#333)","linear-gradient(135deg,#FFB38A,#FF7A5A)","linear-gradient(135deg,#c8f6c8,#FFE45E)"][i];
-                }}
-              />
+            <div key={i} className="cult-card">
+              <img src={c.img} alt={c.caption}
+                onError={e=>{e.target.style.display="none";e.target.parentNode.style.background=["linear-gradient(135deg,#FFE45E,#FFB38A)","linear-gradient(135deg,#111,#333)","linear-gradient(135deg,#FFB38A,#FF7A5A)","linear-gradient(135deg,#c8f6c8,#FFE45E)"][i];}}/>
               <div className="cult-overlay"/>
               <div className="cult-text">
                 <div className="cult-tag">{c.tag}</div>
@@ -529,16 +525,58 @@ export default function App() {
           ))}
         </div>
 
+        {/* Mobile: horizontal snap slider */}
+        <div className="cult-slider">
+          <div
+            ref={sliderRef}
+            className="cult-slider-track"
+            onScroll={e=>{
+              const el = e.currentTarget;
+              // Each card is 72vw wide + 14px gap; use card width directly
+              const card = el.querySelector(".cult-card");
+              if (!card) return;
+              const cardW = card.offsetWidth + 14;
+              setActiveSlide(Math.round(el.scrollLeft / cardW));
+            }}
+          >
+            {CULTURE.map((c,i)=>(
+              <div key={i} className="cult-card">
+                <img src={c.img} alt={c.caption}
+                  onError={e=>{e.target.style.display="none";e.target.parentNode.style.background=["linear-gradient(135deg,#FFE45E,#FFB38A)","linear-gradient(135deg,#111,#333)","linear-gradient(135deg,#FFB38A,#FF7A5A)","linear-gradient(135deg,#c8f6c8,#FFE45E)"][i];}}/>
+                <div className="cult-overlay"/>
+                <div className="cult-text">
+                  <div className="cult-tag">{c.tag}</div>
+                  <div className="cult-cap">{c.caption}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="cult-dots">
+            {CULTURE.map((_,i)=>(
+              <button key={i} className="cult-dot"
+                style={{width:i===activeSlide?22:7,background:i===activeSlide?YLW:(d?"#333":"#ccc")}}
+                onClick={()=>{
+                  if(!sliderRef.current) return;
+                  const card = sliderRef.current.querySelector(".cult-card");
+                  const cardW = card ? card.offsetWidth + 14 : sliderRef.current.scrollWidth / CULTURE.length;
+                  sliderRef.current.scrollTo({left:cardW*i,behavior:"smooth"});
+                  setActiveSlide(i);
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* bottom CTA strip */}
-        <div style={{marginTop:40,display:"flex",alignItems:"center",justifyContent:"space-between",
-          flexWrap:"wrap",gap:16,padding:"24px 32px",borderRadius:20,
-          background:d?"#111":"#111",border:`1px solid rgba(255,228,94,0.2)`}}>
+        <div style={{marginTop:40,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+          textAlign:"center",gap:16,padding:"30px 32px",borderRadius:20,
+          background:"#111",border:`1px solid rgba(255,228,94,0.2)`}}>
           <div>
             <div className="bb" style={{fontSize:"1.4rem",color:"white",letterSpacing:"2px"}}>SHARE YOUR QUENCH MOMENT</div>
             <div style={{color:"#555",fontSize:"0.78rem",marginTop:3}}>Tag us @drinkquench · Get featured</div>
           </div>
           <a href="https://instagram.com" target="_blank" rel="noreferrer">
-            <button className="pill py" style={{padding:"12px 22px",fontSize:"0.84rem"}}>Follow on Instagram ↗</button>
+            <button className="pill py" style={{padding:"12px 28px",fontSize:"0.84rem"}}>Follow on Instagram ↗</button>
           </a>
         </div>
       </section>
