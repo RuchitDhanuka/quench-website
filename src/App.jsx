@@ -17,7 +17,7 @@ const EJS_KEY      = "2qiVqozantoDGpwH2";
    See README for a sample doPost() script.
 ────────────────────────────────────────────────────────────────────────────── */
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwR5Z8acXC8lBe74WxJEoGhqcGRswQTjxU5j9qMAmjdfZfuzYbODCRE5PemSzrjE97e/exec";
+  "https://script.google.com/macros/s/AKfycbxeP1njqA5Fbg4iakdyQfTalFjQu0kmkZfkHX9snngtu61j-0I-731a6hqizMUiVpYsdg/exec";
 
 /* ── Data ── */
 const FLAVOURS = [
@@ -132,12 +132,16 @@ async function sendEmail({ name, email }) {
 
 /* ── Google Sheets via Apps Script ── */
 async function saveToSheet(entry) {
-  // no-cors means we can't read the response body, but the request fires.
+  const formData = new FormData();
+
+  formData.append("name", entry.name || "Friend");
+  formData.append("email", entry.email);
+  formData.append("source", "QUENCH Website");
+
   await fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(entry),
+    body: formData,
   });
 }
 
@@ -189,35 +193,39 @@ export default function App() {
 
   /* ── Submit handler ── */
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitErr("");
-    if (!email) { setSubmitErr("Please enter your email."); return; }
+  e.preventDefault();
 
-    setSending(true);
-    const entry = { name: name || "Friend", email, ts: new Date().toISOString() };
+  setSubmitErr("");
 
-    try {
-      /* 1 — Send confirmation email via EmailJS REST */
-      await sendEmail(entry);
+  if (!email) {
+    setSubmitErr("Please enter your email.");
+    return;
+  }
 
-      /* 2 — Save to Google Sheet (fire-and-forget; no-cors) */
-      saveToSheet(entry).catch(() => {}); // don't block UI on sheet errors
+  setSending(true);
 
-      /* 3 — Persist locally */
-      saveLocal(entry);
-
-      setDone(true);
-      setWCount(c => c + 1);
-      setName("");
-      setEmail("");
-    } catch (err) {
-      console.error("Submission error:", err);
-      setSubmitErr("Something went wrong. Please try again or email us directly.");
-    } finally {
-      setSending(false);
-    }
+  const entry = {
+    name: name || "Friend",
+    email,
+    ts: new Date().toISOString(),
   };
 
+  await saveToSheet(entry);
+
+  saveLocal(entry);
+
+  try {
+    await sendEmail(entry);
+  } catch (emailErr) {
+    console.warn("Email failed, but lead was saved:", emailErr);
+  }
+
+  setDone(true);
+  setWCount((c) => c + 1);
+  setName("");
+  setEmail("");
+  setSending(false);
+};
   /* ── Design tokens ── */
   const d    = dark;
   const BG   = d ? "#0e0e0e" : "#FAFAF7";
@@ -683,8 +691,8 @@ export default function App() {
                 YOU'RE IN{name?`, ${name.toUpperCase()}`:""}!
               </div>
               <div style={{color:"#555",fontSize:"0.86rem",lineHeight:1.7}}>
-                A confirmation is on its way to <strong style={{color:"white"}}>{email}</strong>.<br/>
-                Your 20% off code will be in the launch email. Welcome to the movement.
+Your name has been recorded successfully.<br/>
+Once delivery starts, you’ll be one of the first people we contact.
               </div>
             </div>
           )}
