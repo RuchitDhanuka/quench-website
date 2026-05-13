@@ -322,111 +322,33 @@ export default function App() {
         <div style={{position:"absolute",width:560,height:560,background:"radial-gradient(circle,rgba(255,228,94,0.3) 0%,transparent 70%)",top:-100,right:-100,borderRadius:"50%",pointerEvents:"none"}}/>
         <div style={{position:"absolute",width:380,height:380,background:"radial-gradient(circle,rgba(255,179,138,0.22) 0%,transparent 70%)",bottom:-80,left:-80,borderRadius:"50%",pointerEvents:"none"}}/>
 
-        <div className="hg" style={{
-  display:"flex",
-  alignItems:"center",
-  justifyContent:"space-between",
-  gap:20,
-  width:"100%",
-  position:"relative",
-  zIndex:2,
-  flexWrap:"wrap"
-}}>
-          <div style={{
-  display:"flex",
-  alignItems:"center",
-  gap:"30px",
-  flexWrap:"wrap",
-  width:"100%"
-}}>
-
-  {/* TEXT */}
-  <div style={{flex:"1 1 520px", minWidth:"300px"}}>
-    
-    <div className="fu" style={{
-      marginBottom:22,
-      display:"inline-flex",
-      alignItems:"center",
-      gap:6,
-      background:CARD,
-      boxShadow:`0 4px 20px ${BR}`,
-      borderRadius:999,
-      padding:"8px 16px",
-      fontSize:"0.7rem",
-      fontWeight:700,
-      letterSpacing:"1px",
-      color:TX
-    }}>
-      <span style={{
-        width:8,
-        height:8,
-        borderRadius:"50%",
-        background:"#22c55e",
-        display:"inline-block"
-      }}/>
-      NOW TAKING PRE-ORDERS · SHIPS Q3 2025
-    </div>
-
-    <div style={{
-      display:"flex",
-      alignItems:"center",
-      gap:"10px",
-      flexWrap:"wrap"
-    }}>
-
-      <h1 className="bb fu" style={{
-        fontSize:"clamp(5rem,11vw,9.5rem)",
-        lineHeight:0.88,
-        letterSpacing:"-1px",
-        color:TX,
-        margin:0
-      }}>
-        TEA<br/>
-        THAT<br/>
-        <span style={{
-          color:YLW,
-          WebkitTextStroke:`2px ${TX}`
-        }}>
-          HITS.
-        </span>
-      </h1>
-
-      {/* CAN */}
-      <div className="fc" style={{
-        transform:"rotate(12deg)",
-        marginTop:"40px"
-      }}>
-        <img
-          key={activeCan}
-          src={CANS[activeCan]}
-          alt="QUENCH can"
-          className="ci"
-          style={{
-            width:"220px",
-            height:"auto",
-            filter:"drop-shadow(0 36px 55px rgba(0,0,0,0.28))"
-          }}
-        />
-      </div>
-
-    </div>
-
-    <p className="fu" style={{
-      color:MT,
-      lineHeight:1.8,
-      fontSize:"1rem",
-      maxWidth:460,
-      marginTop:20,
-      marginBottom:34
-    }}>
-      Premium clean-label iced tea for the next generation.
-      Real brewed tea, zero sugar, zero BS.
-      Two flavours. One mission.
-    </p>
-
-  </div>
-
-</div>
+        <div className="hg" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:60,alignItems:"center",width:"100%",position:"relative",zIndex:2}}>
+          <div>
+            <div className="fu" style={{marginBottom:22,display:"inline-flex",alignItems:"center",gap:6,
+              background:CARD,boxShadow:`0 4px 20px ${BR}`,borderRadius:999,padding:"8px 16px",
+              fontSize:"0.7rem",fontWeight:700,letterSpacing:"1px",animationDelay:"0s",color:TX}}>
+              <span style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",display:"inline-block"}}/>
+              NOW TAKING PRE-ORDERS · SHIPS Q3 2025
+            </div>
+            <h1 className="bb fu" style={{fontSize:"clamp(5rem,11vw,9.5rem)",lineHeight:0.88,letterSpacing:"-1px",marginBottom:22,color:TX,animationDelay:"0.1s"}}>
+              TEA<br/>THAT<br/><span style={{color:YLW,WebkitTextStroke:`2px ${TX}`}}>HITS.</span>
+            </h1>
+            <p className="fu" style={{color:MT,lineHeight:1.8,fontSize:"1rem",maxWidth:460,marginBottom:34,animationDelay:"0.22s"}}>
+              Premium clean-label iced tea for the next generation. Real brewed tea, zero sugar, zero BS. Two flavours. One mission.
+            </p>
+            <div className="fu" style={{display:"flex",gap:12,marginBottom:46,flexWrap:"wrap",animationDelay:"0.32s"}}>
+              <a href="#waitlist"><button className="pill pd" style={{padding:"15px 26px",fontSize:"0.93rem"}}>Claim Early Access →</button></a>
+              <a href="#flavours"><button className="pill pl" style={{padding:"15px 26px",fontSize:"0.93rem"}}>See Flavours</button></a>
+            </div>
+            <div ref={statsRef} className="fu" style={{display:"flex",gap:40,animationDelay:"0.42s"}}>
+              {[{v:`${c1}+`,l:"On Waitlist"},{v:`${c2}%`,l:"Real Tea"},{v:`${c3}g`,l:"Sugar"}].map((s,i)=>(
+                <div key={i}>
+                  <div className="bb" style={{fontSize:"2.6rem",lineHeight:1,color:TX}}>{s.v}</div>
+                  <div style={{fontSize:"0.7rem",color:"#888",marginTop:3,fontWeight:700,letterSpacing:"1px"}}>{s.l.toUpperCase()}</div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="hcc" style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",height:560}}>
             {[220,340,460].map((sz,i)=>(
