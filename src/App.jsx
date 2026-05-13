@@ -328,7 +328,7 @@ export default function App() {
               background:CARD,boxShadow:`0 4px 20px ${BR}`,borderRadius:999,padding:"8px 16px",
               fontSize:"0.7rem",fontWeight:700,letterSpacing:"1px",animationDelay:"0s",color:TX}}>
               <span style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",display:"inline-block"}}/>
-              NOW TAKING PRE-ORDERS · SHIPS Q3 2025
+              NOW TAKING PRE-ORDERS · SHIPS Q2 2026
             </div>
             <h1 className="bb fu" style={{fontSize:"clamp(5rem,11vw,9.5rem)",lineHeight:0.88,letterSpacing:"-1px",marginBottom:22,color:TX,animationDelay:"0.1s"}}>
               TEA<br/>THAT<br/><span style={{color:YLW,WebkitTextStroke:`2px ${TX}`}}>HITS.</span>
