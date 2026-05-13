@@ -583,7 +583,7 @@ export default function App() {
             <div className="bb" style={{fontSize:"1.4rem",color:"white",letterSpacing:"2px"}}>SHARE YOUR QUENCH MOMENT</div>
             <div style={{color:"#555",fontSize:"0.78rem",marginTop:3}}>Tag us @drinkquench · Get featured</div>
           </div>
-          <a href="https://instagram.com" target="_blank" rel="noreferrer">
+          <a href="https://www.instagram.com/drinkquench.cool/" target="_blank" rel="noreferrer">
             <button className="pill py" style={{padding:"12px 28px",fontSize:"0.84rem"}}>Follow on Instagram ↗</button>
           </a>
         </div>
@@ -713,7 +713,7 @@ Once delivery starts, you’ll be one of the first people we contact.
         <br/>
         <div style={{color:"#2a2a2a",fontSize:"0.8rem",marginBottom:26}}>Tea That Hits Different. · Real. Clean. Unreal.</div>
         <div style={{display:"flex",gap:26,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
-          {["Instagram","Twitter / X","hello@drinkquench.in","Privacy Policy"].map(l=>(
+          {["Instagram","Youtube","drinkquench.cool@gmail.com","Privacy Policy"].map(l=>(
             <a key={l} href="#" style={{color:"#2a2a2a",textDecoration:"none",fontSize:"0.76rem",fontWeight:600,transition:"color 0.2s"}}
               onMouseOver={e=>e.target.style.color="#888"} onMouseOut={e=>e.target.style.color="#2a2a2a"}>{l}</a>
           ))}
