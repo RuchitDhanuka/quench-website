@@ -291,6 +291,24 @@ export default function App() {
         .cult-dot{height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all 0.3s;}
         /* mobile */
         @media(max-width:820px){
+  .hg{
+    display:flex!important;
+    flex-direction:column-reverse!important;
+    gap:20px!important;
+    text-align:center!important;
+  }
+
+  .hcc{
+    height:330px!important;
+    margin-top:20px!important;
+    margin-bottom:-10px!important;
+  }
+
+  .hcc img{
+    width:220px!important;
+  }
+}
+        @media(max-width:820px){
           .hg,.sg{grid-template-columns:1fr!important;}
           .nl{display:none!important;}
           .hcc{height:400px!important;}
